@@ -1,0 +1,20 @@
+---
+
+- name: Download vault binary ({{ vault_src | basename }})
+  get_url:
+    url: "{{ vault_src }}"
+    checksum: "{{ vault_chksum }}"
+    dest: "/tmp/{{ vault_src | basename }}"
+    force: yes
+    owner: root
+    group: root
+
+- name: Unzip vault binary ({{ vault_src | basename }})
+  unarchive:
+    src: "/tmp/{{ vault_src | basename }}"
+    remote_src: yes
+    dest: "{{ vault_bin_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    keep_newer: true

@@ -1,0 +1,5 @@
+---
+
+vault_src: "https://releases.hashicorp.com/vault/1.15.4/vault_1.15.4_linux_amd64.zip"
+vault_chksum: "sha256:f42f550713e87cceef2f29a4e2b754491697475e3d26c0c5616314e40edd8e1b"
+vault_bin_path: "/usr/bin"

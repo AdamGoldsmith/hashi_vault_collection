@@ -1,0 +1,62 @@
+---
+
+- name: Retrieve vault keys locally
+  set_fact:
+    vault_keys: "{{ lookup('file','{{ vault_keysfile }}') | from_json }}"
+    admin_keys: "{{ lookup('file','{{ vault_admintokenfile }}') | from_json }}"
+  delegate_to: localhost
+
+- name: Enable JWT auth method
+  uri:
+    url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/auth/jwt"
+    validate_certs: no
+    method: POST
+    headers:
+      X-Vault-Token: "{{ admin_keys['auth']['client_token'] }}"
+    body: "{{ lookup('template','jwt_auth.json.j2') }}"
+    body_format: json
+    return_content: yes
+    status_code: 204
+  register: result
+  # Don't fail if "path is already in use at" message appears
+  failed_when: "result.status != 204 and 'path is already in use at ' not in result.content"
+
+- name: Configure JWT auth method
+  uri:
+    url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/jwt/config"
+    validate_certs: no
+    method: POST
+    headers:
+      X-Vault-Token: "{{ admin_keys['auth']['client_token'] }}"
+    body: "{{ lookup('template','jwt_config.json.j2') }}"
+    body_format: json
+    return_content: yes
+    status_code: 204
+  register: result
+  # Don't fail if "path is already in use at" message appears
+  failed_when: "result.status != 204 and 'path is already in use at ' not in result.content"
+
+- name: Create gitlab access policy
+  uri:
+    url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/policy/gitlab"
+    validate_certs: no
+    method: PUT
+    headers:
+      X-Vault-Token: "{{ admin_keys['auth']['client_token'] }}"
+    body: { "policy": "{{ lookup('file', 'policy-gitlab.hcl') }}" }
+    body_format: json
+    return_content: yes
+    status_code: 204
+
+- name: Configure gitlab role
+  uri:
+    url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/jwt/role/gitlab"
+    validate_certs: no
+    method: POST
+    headers:
+      X-Vault-Token: "{{ admin_keys['auth']['client_token'] }}"
+    body: "{{ lookup('template','gitlab_role.json.j2') }}"
+    body_format: json
+    return_content: yes
+    status_code: 200
+  register: result
