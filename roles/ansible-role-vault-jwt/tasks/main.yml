@@ -1,13 +1,13 @@
 ---
 
 - name: Retrieve vault keys locally
-  set_fact:
+  ansible.builtin.set_fact:
     vault_keys: "{{ lookup('file','{{ vault_keysfile }}') | from_json }}"
     admin_keys: "{{ lookup('file','{{ vault_admintokenfile }}') | from_json }}"
   delegate_to: localhost
 
 - name: Enable JWT auth method
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/auth/jwt"
     validate_certs: no
     method: POST
@@ -22,7 +22,7 @@
   failed_when: "result.status != 204 and 'path is already in use at ' not in result.content"
 
 - name: Configure JWT auth method
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/jwt/config"
     validate_certs: no
     method: POST
@@ -37,7 +37,7 @@
   failed_when: "result.status != 204 and 'path is already in use at ' not in result.content"
 
 - name: Create gitlab access policy
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/policy/gitlab"
     validate_certs: no
     method: PUT
@@ -49,7 +49,7 @@
     status_code: 204
 
 - name: Configure gitlab role
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/jwt/role/gitlab"
     validate_certs: no
     method: POST

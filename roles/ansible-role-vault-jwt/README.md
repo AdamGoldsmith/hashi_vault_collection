@@ -22,13 +22,13 @@ Role creation was based on this [GitLab documentation](https://docs.gitlab.com/e
 
 `defaults/main.yml`
 ```yaml
-vault_tls_disable: "false"                                                      # Choose whether to disable TLS for vault connections (not advised)
+vault_tls_disable: false                                                        # Choose whether to disable TLS for vault connections (not advised)
 vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"     # HTTP/HTTPS connection to Vault service - default HTTPS
 vault_addr: "{{ ansible_fqdn }}"                                                # Vault listener address
 vault_port: 8200                                                                # Vault listener port
-vault_keysfile: "~/.hashicorp_vault_keys.json"                                  # Local file storing master key shards
-vault_admintokenfile: "~/.hashicorp_admin_token.json"                           # Local file storing admin token
-jwks_domain: "gitlab.example.com"                                               # Name of GitLab domain
+vault_keysfile: ~/.hashicorp_vault_keys.json                                    # Local file storing master key shards
+vault_admintokenfile: ~/.hashicorp_admin_token.json                             # Local file storing admin token
+jwks_domain: gitlab.example.com                                                 # Name of GitLab domain
 ```
 
 ## Dependencies
