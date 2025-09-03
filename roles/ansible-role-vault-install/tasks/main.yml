@@ -16,30 +16,26 @@
     name: "{{ vault_dep_packages }}"
     state: present
 
-- name: Skip Vault download & installation
-  block:
-
-    - name: Download vault binary ({{ vault_src | basename }})
-      ansible.builtin.get_url:
-        url: "{{ vault_src }}"
-        checksum: "{{ vault_chksum }}"
-        dest: "/tmp/{{ vault_src | basename }}"
-        force: yes
-        owner: root
-        group: root
-
-    - name: Unzip vault binary ({{ vault_src | basename }})
-      ansible.builtin.unarchive:
-        src: "/tmp/{{ vault_src | basename }}"
-        remote_src: yes
-        dest: "{{ vault_bin_path }}"
-        creates: "{{ vault_bin_path }}/vault"
-        owner: root
-        group: root
-        mode: "0755"
-        keep_newer: true
-
+- name: Download vault binary ({{ vault_src | basename }})
+  ansible.builtin.get_url:
+    url: "{{ vault_src }}"
+    checksum: "{{ vault_chksum }}"
+    dest: "/tmp/{{ vault_src | basename }}"
+    force: yes
+    owner: root
+    group: root
   when: not vault_skip_download
+
+- name: Unzip vault binary ({{ vault_src | basename }})
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ vault_src | basename }}"
+    remote_src: yes
+    dest: "{{ vault_bin_path }}"
+    creates: "{{ vault_bin_path }}/vault"
+    owner: root
+    group: root
+    mode: "0755"
+    keep_newer: true
 
 - name: Create vault group
   ansible.builtin.group:
