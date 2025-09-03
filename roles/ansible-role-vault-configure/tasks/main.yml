@@ -1,22 +1,22 @@
 ---
 
 - name: Create audit log directory
-  file:
+  ansible.builtin.file:
     path: "{{ audit_path }}"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: 0750
+    mode: "0750"
     state: directory
 
 - name: Retrieve keys locally
-  set_fact:
+  ansible.builtin.set_fact:
     vault_keys: "{{ lookup('file','{{ vault_keysfile }}') | from_json }}"
   delegate_to: localhost
   become: no
   run_once: yes
 
 - name: Enable auditing to file
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/audit/ansible"
     validate_certs: no
     method: PUT
@@ -34,11 +34,11 @@
 - name: Create vault policies
   vars:
     policies:
-      - "admin"
-      - "provisioner"
-    policy_file: "policy-{{ item }}.hcl"
-  uri:
-    url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/policy/{{ item }}"
+      - admin
+      - provisioner
+    policy_file: "policy-{{ policy_item }}.hcl"
+  ansible.builtin.uri:
+    url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/policy/{{ policy_item }}"
     validate_certs: no
     method: PUT
     headers:
@@ -50,9 +50,11 @@
   become: no
   run_once: yes
   loop: "{{ policies }}"
+  loop_control:
+    loop_var: policy_item
 
 - name: Create and capture admin token
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/token/create"
     validate_certs: no
     method: POST
@@ -70,15 +72,15 @@
 - name: Create and capture management tokens
   vars:
     policies:
-      - "provisioner"
-  uri:
+      - provisioner
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/token/create"
     validate_certs: no
     method: POST
     headers:
       # Use the newly created admin token to create the provisioner policy
       X-Vault-Token: "{{ admin_token['json']['auth']['client_token'] }}"
-    body: '{ "policies": "{{ item }}" }'
+    body: '{ "policies": "{{ policy_item }}" }'
     body_format: json
     return_content: yes
     status_code: 200
@@ -87,11 +89,13 @@
   register: management_tokens
   run_once: yes
   loop: "{{ policies }}"
+  loop_control:
+    loop_var: policy_item
 
 - name: Save tokens locally
-  copy:
-    content: "{{ item[0] }}"
-    dest: "{{ item[1] }}"
+  ansible.builtin.copy:
+    content: "{{ token_item[0] }}"
+    dest: "{{ token_item[1] }}"
     mode: 0600
   delegate_to: localhost
   become: no
@@ -99,5 +103,7 @@
   run_once: yes
   loop:
     - [ "{{ admin_token['json'] }}", "{{ vault_admintokenfile }}" ]
-    - [ "{{ management_tokens['results'] | selectattr('item', 'equalto', 'provisioner') | map(attribute='json') | list | first }}", "{{ vault_provisionertokenfile }}" ]
+    - [ "{{ management_tokens['results'] | selectattr('token_item', 'equalto', 'provisioner') | map(attribute='json') | list | first }}", "{{ vault_provisionertokenfile }}" ]
+  loop_control:
+    loop_var: token_item
 
