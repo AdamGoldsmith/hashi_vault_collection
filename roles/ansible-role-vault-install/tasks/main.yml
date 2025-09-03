@@ -16,7 +16,7 @@
     name: "{{ vault_dep_packages }}"
     state: present
 
-- name: Download vault binary ({{ vault_src | basename }})
+- name: "Download vault binary ({{ vault_src | basename }})"
   ansible.builtin.get_url:
     url: "{{ vault_src }}"
     checksum: "{{ vault_chksum }}"
@@ -26,7 +26,7 @@
     group: root
   when: not vault_skip_download
 
-- name: Unzip vault binary ({{ vault_src | basename }})
+- name: "Unzip vault binary ({{ vault_src | basename }})"
   ansible.builtin.unarchive:
     src: "/tmp/{{ vault_src | basename }}"
     remote_src: yes
