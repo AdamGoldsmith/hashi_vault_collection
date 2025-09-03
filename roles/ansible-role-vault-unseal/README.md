@@ -17,12 +17,12 @@ Currently tested on these Operating Systems
 
 `defaults/main.yml`
 ```yaml
-vault_tls_disable: "false"                                                      # Choose whether to disable TLS for vault connections (not advised)
+vault_tls_disable: false                                                        # Choose whether to disable TLS for vault connections (not advised)
 vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"     # HTTP/HTTPS connection to Vault service - default HTTPS
 vault_addr: "{{ ansible_fqdn}}"                                                 # Vault listener address
 vault_port: 8200                                                                # Vault listener port
-vault_service: "vault"                                                          # Name of the vault systemd service
-vault_keysfile: "~/.hashicorp_vault_keys.json"                                  # Local file storing master key shards
+vault_service: vault                                                            # Name of the vault systemd service
+vault_keysfile: ~/.hashicorp_vault_keys.json                                    # Local file storing master key shards
 key_threshold: 3                                                                # Minimum number of keys for unseal quorum
 ```
 

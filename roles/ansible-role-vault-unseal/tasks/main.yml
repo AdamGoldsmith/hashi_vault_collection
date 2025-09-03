@@ -1,19 +1,19 @@
 ---
 
 - name: Start vault systemd service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ vault_service }}"
     state: started
   become: yes
 
 - name: Retrieve keys locally
-  set_fact:
+  ansible.builtin.set_fact:
     vault_keys: "{{ lookup('file','{{ vault_keysfile }}') | from_json }}"
   delegate_to: localhost
   run_once: yes
 
 - name: Detect vault status
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/health"
     validate_certs: no
     method: GET
@@ -25,16 +25,18 @@
   register: vault_status
 
 - name: Unseal initialised vaults first
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/unseal"
     validate_certs: no
     method: PUT
-    body: "{ 'key':'{{ item }}' }"
+    body: "{ 'key':'{{ key_item }}' }"
     body_format: json
     return_content: yes
     status_code: 200
   # Pick threshold number of random keys from keys list
   loop: "{{ (vault_keys['keys'] | shuffle) [:key_threshold] }}"
+  loop_control:
+    loop_var: key_item
   no_log: yes
   register: vault_unseal_result
   when: vault_status['status'] == 503
@@ -43,31 +45,35 @@
 # In this case, when not all vaults were "skipped"
 # Delegated to localhost as unsealed vault is not known
 - name: Capture unseal process
-  set_fact:
+  ansible.builtin.set_fact:
     vault_unsealed: yes
   delegate_to: "{{ ansible_play_hosts[0] }}"
   loop: "{{ ansible_play_hosts }}"
+  loop_control:
+    loop_var: host_item
   run_once: yes
-  when: hostvars[item]['vault_unseal_result']['results'] |
+  when: hostvars[host_item]['vault_unseal_result']['results'] |
     rejectattr('skipped', 'defined') | list | length
 
 # Pause depending on condition of localhost fact
 - name: Wait for raft cluster to stabilise
-  pause:
+  ansible.builtin.pause:
     seconds: 15
   when: hostvars[ansible_play_hosts[0]]['vault_unsealed'] |
     default(false) | bool
 
 - name: Unseal remaining vaults
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/unseal"
     validate_certs: no
     method: PUT
-    body: "{ 'key':'{{ item }}' }"
+    body: "{ 'key':'{{ key_item }}' }"
     body_format: json
     return_content: yes
     status_code: 200
   # Pick threshold number of random keys from keys list
   loop: "{{ (vault_keys['keys'] | shuffle) [:key_threshold] }}"
+  loop_control:
+    loop_var: key_item
   no_log: yes
   when: vault_status['status'] == 501
