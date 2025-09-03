@@ -22,7 +22,7 @@
 
 - name: Save keys locally
   ansible.builtin.copy:
-    content: "{{ vault_init.json }}"
+    content: "{{ vault_init['json'] }}"
     dest: "{{ vault_keysfile }}"
     mode: 0600
   delegate_to: localhost
