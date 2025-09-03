@@ -1,14 +1,14 @@
 ---
 
 - name: Retrieve keys locally
-  set_fact:
+  ansible.builtin.set_fact:
     vault_keys: "{{ lookup('file','{{ vault_keysfile }}') | from_json }}"
   delegate_to: localhost
   become: no
   run_once: yes
 
 - name: Enable approle auth method
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/auth/approle"
     validate_certs: no
     method: POST
@@ -25,7 +25,7 @@
   run_once: yes
 
 - name: Create {{ approle_name }} policy
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/policy/{{ approle_name }}"
     validate_certs: no
     method: PUT
@@ -39,7 +39,7 @@
   run_once: yes
 
 - name: Create {{ approle_name }} role
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/approle/role/{{ approle_name }}"
     validate_certs: no
     method: POST
@@ -51,4 +51,3 @@
     status_code: 204
   become: no
   run_once: yes
-
