@@ -1,31 +1,26 @@
 ---
 
 - name: Load OS-specific vars
-  include_vars: "{{ lookup('first_found', params) }}"
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
       files:
-        - '{{ ansible_distribution }}.yml'
-        - '{{ ansible_os_family }}.yml'
+        - "{{ ansible_distribution }}.yml"
+        - "{{ ansible_os_family }}.yml"
         - Default.yml
       paths:
-        - 'vars'
+        - vars
 
 - name: Install software dependencies
-  vars:
-    packages:
-      - zip
-      - unzip
-      - python3
-  package:
-    name: "{{ packages }}"
+  ansible.builtin.package:
+    name: "{{ vault_dep_packages }}"
     state: present
 
 - name: Skip Vault download & installation
   block:
 
     - name: Download vault binary ({{ vault_src | basename }})
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ vault_src }}"
         checksum: "{{ vault_chksum }}"
         dest: "/tmp/{{ vault_src | basename }}"
@@ -34,7 +29,7 @@
         group: root
 
     - name: Unzip vault binary ({{ vault_src | basename }})
-      unarchive:
+      ansible.builtin.unarchive:
         src: "/tmp/{{ vault_src | basename }}"
         remote_src: yes
         dest: "{{ vault_bin_path }}"
@@ -47,23 +42,23 @@
   when: not vault_skip_download
 
 - name: Create vault group
-  group:
+  ansible.builtin.group:
     name: "{{ vault_group }}"
     gid: "{{ vault_gid }}"
     state: present
 
 - name: Create vault user
-  user:
+  ansible.builtin.user:
     name: "{{ vault_user }}"
     group: "{{ vault_group }}"
     uid: "{{ vault_uid }}"
-    comment: "vault systemd service user"
+    comment: vault systemd service user
     shell: /sbin/nologin
     system: yes
     state: present
 
 - name: Create vault directory structures
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
@@ -75,41 +70,39 @@
     - "{{ vault_data_path }}"
 
 - name: Install python3-pip
-  vars:
-    packages: "{{ pip_packages }}"
-  package:
-    name: "{{ packages }}"
+  ansible.builtin.package:
+    name: "{{ vault_pip_packages }}"
     state: present
     update_cache: yes
 
 - name: Install pip into a virtual environment
-  pip:
+  ansible.builtin.pip:
     name: pip
     state: latest
-    virtualenv: "{{ venv_path }}"
+    virtualenv: "{{ vault_venv_path }}"
     virtualenv_command: "{{ discovered_interpreter_python }} -m venv"
 
 - name: TLS block
   vars:
-    ansible_python_interpreter: "{{ venv_path }}/bin/python"
+    ansible_python_interpreter: "{{ vault_venv_path }}/bin/python"
   block:
 
     - name: Install python cryptography dependencies
-      pip:
+      ansible.builtin.pip:
         name: "{{ item }}"
-        virtualenv: "{{ venv_path }}"
+        virtualenv: "{{ vault_venv_path }}"
       loop:
-        - "cryptography"
+        - cryptography
 
     - name: Generate OpenSSL private key pem file
-      openssl_privatekey:
+      community.crypto.openssl_privatekey:
         path: "{{ vault_privkey }}"
         owner: "{{ vault_user }}"
         group: "{{ vault_group }}"
         mode: "0600"
 
     - name: Generate an OpenSSL CSR
-      openssl_csr:
+      community.crypto.openssl_csr:
         path: "{{ vault_csr }}"
         owner: "{{ vault_user }}"
         group: "{{ vault_group }}"
@@ -120,7 +113,7 @@
         organization_name: "{{ vault_on }}"
 
     - name: Generate a Self-Signed OpenSSL certificate
-      openssl_certificate:
+      community.crypto.x509_certificate:
         path: "{{ vault_certfile }}"
         owner: "{{ vault_user }}"
         group: "{{ vault_group }}"
@@ -130,26 +123,25 @@
         provider: selfsigned
 
     - name: Read TLS certificate file
-      slurp:
+      ansible.builtin.slurp:
         path: "{{ vault_certfile }}"
       register: cert_slurp
 
     - name: Copy TLS certificates to all other vault hosts
-      copy:
+      ansible.builtin.copy:
         dest: "{{ hostvars[vault_host]['cert_slurp']['source'] }}"
         content: "{{ hostvars[vault_host]['cert_slurp']['content'] | b64decode }}"
         owner: "{{ vault_user }}"
         group: "{{ vault_group }}"
         mode: "0644"
-      loop: "{{ ansible_play_hosts |
-        reject('equalto', inventory_hostname) | list }}"
+      loop: "{{ ansible_play_hosts | reject('equalto', inventory_hostname) | list }}"
       loop_control:
         loop_var: vault_host
 
   when: not vault_tls_disable | default(false) | bool
 
 - name: Create vault server configuration
-  template:
+  ansible.builtin.template:
     src: config.j2
     dest: "{{ vault_conf }}"
     owner: "{{ vault_user }}"
@@ -157,7 +149,7 @@
     mode: "0640"
 
 - name: Create vault systemd service config
-  template:
+  ansible.builtin.template:
     src: service.j2
     dest: "/etc/systemd/system/{{ vault_service }}.service"
     owner: root
@@ -165,17 +157,16 @@
     mode: "0664"
 
 - name: Start and enable vault systemd service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ vault_service }}"
     daemon_reload: yes
     state: started
     enabled: yes
 
 - name: Set VAULT_ADDR listener in profile
-  template:
+  ansible.builtin.template:
     src: profile.j2
     dest: /etc/profile.d/vault.sh
     owner: root
     group: root
     mode: "0755"
-

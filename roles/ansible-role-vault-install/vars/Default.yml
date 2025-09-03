@@ -1,4 +1,7 @@
 ---
-pip_packages:
+vault_dep_packages:
+  - zip
+  - unzip
+  - python3
+vault_pip_packages:
   - python3-pip
-
