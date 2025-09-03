@@ -25,8 +25,8 @@ Currently tested on these Operating Systems
 
 `defaults/main.yml`
 ```yaml
-vault_src: https://releases.hashicorp.com/vault/0.10.3/vault_1.9.3_linux_amd64.zip	# Version of vault to download from Hashicorp's website
-vault_chksum: sha256:16059f245fb4df2800fe6ba320ea66aba9c2615348e37bcfd42754591a528639	# Vault download file checksum
+vault_src: https://releases.hashicorp.com/vault/1.20.3/vault_1.20.3_linux_amd64.zip	# Version of vault to download from Hashicorp's website
+vault_chksum: sha256:128d35b82bed319b8ce3caec99286a7d458342d8def5e6ca4d20cc7621df53d3	# Vault download file checksum
 vault_skip_download: no                                                                 # Skip downloading Vault binary - this can be time-consuming if you already have it installed (unzip will fail if it's not already downloaded)
 vault_bin_path: /usr/bin								# Path to install vault binary
 vault_conf: /etc/vault/config.hcl							# Vault configuration file
