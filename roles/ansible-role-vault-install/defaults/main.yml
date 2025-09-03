@@ -26,6 +26,4 @@ vault_service: "vault"
 vault_profile: "/etc/profile.d/vault.sh"
 vault_data_path: "/data/vault"
 vault_ui: "true"
-venv_path: /data/venv/vault
-venv_python: "{{ venv_path }}/bin/python"
-
+venv_path: "/data/venv/vault"

@@ -51,6 +51,7 @@ vault_service: "vault"									# Name of the vault systemd service
 vault_profile: "/etc/profile.d/vault.sh"						# System-wide profile for setting Vault listening address
 vault_data_path: "/data/vault"                                                          # Backend raft storage directory
 vault_ui: "true"                                                                        # Enable Web UI
+venv_path: "/data/venv/vault"                                                           # Python virtual env installation path
 ```
 
 ## Dependencies

@@ -91,7 +91,7 @@
 
 - name: TLS block
   vars:
-    ansible_python_interpreter: "{{ venv_python }}"
+    ansible_python_interpreter: "{{ venv_path }}/bin/python"
   block:
 
     - name: Install python cryptography dependencies
