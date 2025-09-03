@@ -1,14 +1,13 @@
 ---
 
 - name: Start vault systemd service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ vault_service }}"
     state: started
 
 - name: Initialise vault
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/init"
-    # client_cert: "{{ vault_certfile }}"
     validate_certs: no
     method: PUT
     body: "{{ lookup('file','init_params.json') }}"
@@ -22,7 +21,7 @@
   run_once: yes
 
 - name: Save keys locally
-  copy:
+  ansible.builtin.copy:
     content: "{{ vault_init.json }}"
     dest: "{{ vault_keysfile }}"
     mode: 0600
