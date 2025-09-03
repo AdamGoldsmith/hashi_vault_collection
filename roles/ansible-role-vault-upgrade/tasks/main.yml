@@ -1,16 +1,17 @@
 ---
 
-- name: Download vault binary ({{ vault_src | basename }})
-  get_url:
+- name: "Download vault binary ({{ vault_src | basename }})"
+  ansible.builtin.get_url:
     url: "{{ vault_src }}"
     checksum: "{{ vault_chksum }}"
     dest: "/tmp/{{ vault_src | basename }}"
     force: yes
     owner: root
     group: root
+    mode: "0644"
 
-- name: Unzip vault binary ({{ vault_src | basename }})
-  unarchive:
+- name: "Unzip vault binary ({{ vault_src | basename }})"
+  ansible.builtin.unarchive:
     src: "/tmp/{{ vault_src | basename }}"
     remote_src: yes
     dest: "{{ vault_bin_path }}"
