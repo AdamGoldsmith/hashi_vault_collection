@@ -1,15 +1,15 @@
 ---
 
 - name: Retrieve vault keys locally
-  set_fact:
+  ansible.builtin.set_fact:
     vault_keys: "{{ lookup('file','{{ vault_keysfile }}') | from_json }}"
     admin_keys: "{{ lookup('file','{{ vault_admintokenfile }}') | from_json }}"
   delegate_to: localhost
   become: no
   run_once: yes
 
-- name: Enable SSH engine at {{ ssh_client }}
-  uri:
+- name: "Enable SSH engine at {{ ssh_client }}"
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/mounts/{{ ssh_client }}"
     validate_certs: no
     method: POST
@@ -25,8 +25,8 @@
   failed_when: "result.status != 204 and 'path is already in use at ' not in result.content"
   run_once: yes
 
-- name: Generate CA for {{ ssh_client }}
-  uri:
+- name: "Generate CA for {{ ssh_client }}"
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/{{ ssh_client }}/config/ca"
     validate_certs: no
     method: POST
@@ -42,8 +42,8 @@
   failed_when: "result.status != 200 and 'keys are already configured; delete them before reconfiguring' not in result.content"
   run_once: yes
 
-- name: Create role for signing client public SSH keys {{ sshrole_name }}
-  uri:
+- name: "Create role for signing client public SSH keys {{ sshrole_name }}"
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/{{ ssh_client }}/roles/ssh-client-role"
     validate_certs: no
     method: POST
@@ -59,8 +59,8 @@
   failed_when: "result.status != 204 and 'path is already in use' not in result.content"
   run_once: yes
 
-- name: Enable SSH engine at {{ ssh_host }}
-  uri:
+- name: "Enable SSH engine at {{ ssh_host }}"
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/mounts/{{ ssh_host }}"
     validate_certs: no
     method: POST
@@ -76,8 +76,8 @@
   failed_when: "result.status != 204 and 'path is already in use at ' not in result.content"
   run_once: yes
 
-- name: Tune SSH engine at {{ ssh_host }}
-  uri:
+- name: "Tune SSH engine at {{ ssh_host }}"
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/mounts/{{ ssh_host }}/tune"
     validate_certs: no
     method: POST
@@ -93,8 +93,8 @@
   failed_when: "result.status != 204 and 'existing mount at ' not in result.content"
   run_once: yes
 
-- name: Generate CA for {{ ssh_host }}
-  uri:
+- name: "Generate CA for {{ ssh_host }}"
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/{{ ssh_host }}/config/ca"
     validate_certs: no
     method: POST
@@ -110,8 +110,8 @@
   failed_when: "result.status != 200 and 'keys are already configured; delete them before reconfiguring' not in result.content"
   run_once: yes
 
-- name: Create role for signing host public SSH keys {{ hostrole_name }}
-  uri:
+- name: "Create role for signing host public SSH keys {{ hostrole_name }}"
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/{{ ssh_host }}/roles/ssh-host-role"
     validate_certs: no
     method: POST
@@ -128,7 +128,7 @@
   run_once: yes
 
 - name: Create sshkeysigner policy
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/sys/policy/sshkeysigner"
     validate_certs: no
     method: PUT
@@ -142,7 +142,7 @@
   run_once: yes
 
 - name: Create and capture sshkeysigner token
-  uri:
+  ansible.builtin.uri:
     url: "{{ vault_protocol }}://{{ vault_addr }}:{{ vault_port }}/v1/auth/token/create"
     validate_certs: no
     method: POST
@@ -158,9 +158,9 @@
   run_once: yes
 
 - name: Save tokens locally
-  copy:
-    content: "{{ item[0] }}"
-    dest: "{{ item[1] }}"
+  ansible.builtin.copy:
+    content: "{{ token_item[0] }}"
+    dest: "{{ token_item[1] }}"
     mode: 0600
   delegate_to: localhost
   become: no
@@ -168,3 +168,5 @@
   run_once: yes
   loop:
     - [ "{{ sshkeysigner_tokens['json'] }}", "{{ vault_sshkeysignertokenfile }}" ]
+  loop_control:
+    loop_var: token_item
