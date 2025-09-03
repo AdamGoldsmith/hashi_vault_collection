@@ -27,6 +27,7 @@
     - "{{ vault_certs }}"
     - "{{ vault_conf | dirname }}"
     - "{{ audit_path }}"
+    - "{{ venv_path }}"
     - "{{ vault_data_path }}"
 
 - name: Remove vault user
