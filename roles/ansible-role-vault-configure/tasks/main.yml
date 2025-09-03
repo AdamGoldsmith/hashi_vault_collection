@@ -103,7 +103,7 @@
   run_once: yes
   loop:
     - [ "{{ admin_token['json'] }}", "{{ vault_admintokenfile }}" ]
-    - [ "{{ management_tokens['results'] | selectattr('token_item', 'equalto', 'provisioner') | map(attribute='json') | list | first }}", "{{ vault_provisionertokenfile }}" ]
+    - [ "{{ management_tokens['results'] | selectattr('policy_item', 'equalto', 'provisioner') | map(attribute='json') | list | first }}", "{{ vault_provisionertokenfile }}" ]
   loop_control:
     loop_var: token_item
 
