@@ -1,6 +1,6 @@
 ---
 
 - name: Stop vault systemd service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ vault_service }}"
     state: stopped
