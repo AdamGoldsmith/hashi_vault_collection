@@ -1,12 +1,12 @@
 ---
 
 - name: Remove VAULT_ADDR profile
-  file:
+  ansible.builtin.file:
     path: /etc/profile.d/vault.sh
     state: absent
 
 - name: Stop and disable vault service
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ vault_service }}"
     state: stopped
     enabled: no
@@ -15,34 +15,36 @@
   failed_when: "stop_result is failed and ('find' not in stop_result.msg and 'found' not in stop_result.msg)"
 
 - name: Delete vault systemd service config
-  file:
+  ansible.builtin.file:
     path: "/etc/systemd/system/{{ vault_service }}.service"
     state: absent
 
 - name: Delete vault server directories
-  file:
-    path: "{{ item }}"
+  ansible.builtin.file:
+    path: "{{ dir_item }}"
     state: absent
-  with_items:
+  loop:
     - "{{ vault_certs }}"
     - "{{ vault_conf | dirname }}"
     - "{{ audit_path }}"
     - "{{ venv_path }}"
     - "{{ vault_data_path }}"
+  loop_control:
+    loop_var: dir_item
 
 - name: Remove vault user
-  user:
+  ansible.builtin.user:
     name: "{{ vault_user }}"
     state: absent
     force: yes
     remove: yes
 
 - name: Remove vault group
-  group:
+  ansible.builtin.group:
     name: "{{ vault_group }}"
     state: absent
 
 - name: Remove vault binary
-  file:
+  ansible.builtin.file:
     path: "{{ vault_bin_path }}/vault"
     state: absent
