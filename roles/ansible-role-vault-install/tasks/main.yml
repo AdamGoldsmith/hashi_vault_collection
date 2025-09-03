@@ -24,6 +24,7 @@
     force: yes
     owner: root
     group: root
+    mode: "0644"
   when: not vault_skip_download
 
 - name: "Unzip vault binary ({{ vault_src | basename }})"
