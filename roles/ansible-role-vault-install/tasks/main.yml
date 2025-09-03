@@ -1,5 +1,16 @@
 ---
 
+- name: Load OS-specific vars
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - Default.yml
+      paths:
+        - 'vars'
+
 - name: Install software dependencies
   vars:
     packages:
@@ -10,25 +21,30 @@
     name: "{{ packages }}"
     state: present
 
-- name: Download vault binary ({{ vault_src | basename }})
-  get_url:
-    url: "{{ vault_src }}"
-    checksum: "{{ vault_chksum }}"
-    dest: "/tmp/{{ vault_src | basename }}"
-    force: yes
-    owner: root
-    group: root
+- name: Skip Vault download & installation
+  block:
 
-- name: Unzip vault binary ({{ vault_src | basename }})
-  unarchive:
-    src: "/tmp/{{ vault_src | basename }}"
-    remote_src: yes
-    dest: "{{ vault_bin_path }}"
-    creates: "{{ vault_bin_path }}/vault"
-    owner: root
-    group: root
-    mode: "0755"
-    keep_newer: true
+    - name: Download vault binary ({{ vault_src | basename }})
+      get_url:
+        url: "{{ vault_src }}"
+        checksum: "{{ vault_chksum }}"
+        dest: "/tmp/{{ vault_src | basename }}"
+        force: yes
+        owner: root
+        group: root
+
+    - name: Unzip vault binary ({{ vault_src | basename }})
+      unarchive:
+        src: "/tmp/{{ vault_src | basename }}"
+        remote_src: yes
+        dest: "{{ vault_bin_path }}"
+        creates: "{{ vault_bin_path }}/vault"
+        owner: root
+        group: root
+        mode: "0755"
+        keep_newer: true
+
+  when: not vault_skip_download
 
 - name: Create vault group
   group:
@@ -60,29 +76,28 @@
 
 - name: Install python3-pip
   vars:
-    packages:
-      - python3-pip
+    packages: "{{ pip_packages }}"
   package:
     name: "{{ packages }}"
     state: present
     update_cache: yes
-  when: ansible_distribution == 'Ubuntu'
 
-- name: Upgrade PIP
+- name: Install pip into a virtual environment
   pip:
     name: pip
     state: latest
-    executable: pip3
+    virtualenv: "{{ venv_path }}"
+    virtualenv_command: "{{ discovered_interpreter_python }} -m venv"
 
 - name: TLS block
   vars:
-    ansible_python_interpreter: /usr/bin/python3
+    ansible_python_interpreter: "{{ venv_python }}"
   block:
 
     - name: Install python cryptography dependencies
       pip:
         name: "{{ item }}"
-        executable: pip3
+        virtualenv: "{{ venv_path }}"
       loop:
         - "cryptography"
 
@@ -114,17 +129,12 @@
         csr_path: "{{ vault_csr }}"
         provider: selfsigned
 
-    - name: Read TLS private key file
-      slurp:
-        path: "{{ vault_privkey }}"
-      register: private_key_slurp
-
     - name: Read TLS certificate file
       slurp:
         path: "{{ vault_certfile }}"
       register: cert_slurp
 
-    - name: Write TLS certificate of all other vault hosts locally
+    - name: Copy TLS certificates to all other vault hosts
       copy:
         dest: "{{ hostvars[vault_host]['cert_slurp']['source'] }}"
         content: "{{ hostvars[vault_host]['cert_slurp']['content'] | b64decode }}"
@@ -168,3 +178,4 @@
     owner: root
     group: root
     mode: "0755"
+
