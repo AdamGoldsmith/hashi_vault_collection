@@ -74,7 +74,9 @@
 
 - name: Install pip into a virtual environment
   ansible.builtin.pip:
-    name: pip
+    name:
+      - pip
+      - packaging
     state: latest
     virtualenv: "{{ vault_venv_path }}"
     virtualenv_command: "{{ discovered_interpreter_python }} -m venv"
@@ -86,10 +88,9 @@
 
     - name: Install python cryptography dependencies
       ansible.builtin.pip:
-        name: "{{ item }}"
+        name:
+          - cryptography
         virtualenv: "{{ vault_venv_path }}"
-      loop:
-        - cryptography
 
     - name: Generate OpenSSL private key pem file
       community.crypto.openssl_privatekey:
