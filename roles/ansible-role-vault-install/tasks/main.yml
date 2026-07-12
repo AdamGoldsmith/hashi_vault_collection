@@ -63,7 +63,7 @@
     state: directory
   loop:
     - "{{ vault_conf | dirname }}"
-    - "{{ vault_certs }}"
+    - "{{ vault_certs_dir }}"
     - "{{ vault_data_path }}"
 
 - name: Install python3-pip

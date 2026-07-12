@@ -4,8 +4,8 @@ vault_tls_disable: false
 vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"
 vault_addr: "{{ ansible_fqdn }}"
 vault_port: 8200
-vault_certs: /etc/vault/certs
-vault_certfile: "{{ vault_certs }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"
+vault_certs_dir: /etc/vault/certs
+vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"
 vault_user: vault
 vault_group: vault
 vault_service: vault

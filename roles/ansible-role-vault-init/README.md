@@ -21,8 +21,8 @@ vault_tls_disable: false                                                        
 vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"                     # HTTP/HTTPS connection to Vault service - default HTTPS
 vault_addr: "{{ ansible_fqdn }}"								# Vault listener address
 vault_port: 8200										# Vault listener port
-vault_certs: /etc/vault/certs									# Vault certificates directory
-vault_certfile: "{{ vault_certs }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"         # OpenSSL Certificate filename
+vault_certs_dir: /etc/vault/certs								# Vault certificates directory
+vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"     # OpenSSL Certificate filename
 vault_user: vault										# User to run the vault systemd service
 vault_group: vault										# Group for vault user
 vault_service: vault										# Name of the vault systemd service

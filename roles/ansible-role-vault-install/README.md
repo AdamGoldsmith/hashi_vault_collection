@@ -25,33 +25,33 @@ Currently tested on these Operating Systems
 
 `defaults/main.yml`
 ```yaml
-vault_src: https://releases.hashicorp.com/vault/1.20.3/vault_1.20.3_linux_amd64.zip	# Version of vault to download from Hashicorp's website
-vault_chksum: sha256:128d35b82bed319b8ce3caec99286a7d458342d8def5e6ca4d20cc7621df53d3	# Vault download file checksum
-vault_skip_download: no                                                                 # Skip downloading Vault binary - this can be time-consuming if you already have it installed (unzip will fail if it's not already downloaded)
-vault_bin_path: /usr/bin								# Path to install vault binary
-vault_conf: /etc/vault/config.hcl							# Vault configuration file
-vault_tls_disable: false								# Choose whether to disable TLS for vault connections (not advised)
-vault_mlock_disable: false                                                              # Disbale mlock - sometimes required for the infrastructure (eg LXD)
-vault_certs: /etc/vault/certs								# Vault certificates directory
-vault_cn: "{{ vault_addr }}"								# CSR Common Name
-vault_cc: UK										# CSR Country Code
-vault_on: Vault	        								# CSR Organization Name
-vault_privkey: "{{ vault_certs }}/{{ vault_addr | regex_replace('^www\\.', '') }}.pem"  # OpenSSL Private Key filename
-vault_csr: "{{ vault_certs }}/{{ vault_addr }}.csr"                                     # OpenSSL Certificate Signing Request filename
-vault_certfile: "{{ vault_certs }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt" # OpenSSL Certificate filename
-vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"             # HTTP/HTTPS connection to Vault service - default HTTPS
-vault_addr: "{{ ansible_fqdn }}"                                                        # Vault listener address
-vault_port: 8200									# Vault listener port
-vault_cluster_port: 8201								# Vault cluster port
-vault_user: vault									# User to run the vault systemd service
-vault_uid: 8201 									# UID of vault user
-vault_group: vault									# Group for vault user
-vault_gid: 8201 									# GID of vault group
-vault_service: vault									# Name of the vault systemd service
-vault_profile: /etc/profile.d/vault.sh  						# System-wide profile for setting Vault listening address
-vault_data_path: /data/vault                                                            # Backend raft storage directory
-vault_ui: true                                                                          # Enable Web UI
-vault_venv_path: /data/venv/vault                                                       # Python virtual env installation path
+vault_src: https://releases.hashicorp.com/vault/1.20.3/vault_1.20.3_linux_amd64.zip	        # Version of vault to download from Hashicorp's website
+vault_chksum: sha256:128d35b82bed319b8ce3caec99286a7d458342d8def5e6ca4d20cc7621df53d3	        # Vault download file checksum
+vault_skip_download: no                                                                         # Skip downloading Vault binary - this can be time-consuming if you already have it installed (unzip will fail if it's not already downloaded)
+vault_bin_path: /usr/bin								        # Path to install vault binary
+vault_conf: /etc/vault/config.hcl							        # Vault configuration file
+vault_tls_disable: false								        # Choose whether to disable TLS for vault connections (not advised)
+vault_mlock_disable: false                                                                      # Disbale mlock - sometimes required for the infrastructure (eg LXD)
+vault_certs_dir: /etc/vault/certs								# Vault certificates directory
+vault_cn: "{{ vault_addr }}"								        # CSR Common Name
+vault_cc: UK										        # CSR Country Code
+vault_on: Vault	        								        # CSR Organization Name
+vault_privkey: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.pem"      # OpenSSL Private Key filename
+vault_csr: "{{ vault_certs_dir }}/{{ vault_addr }}.csr"                                         # OpenSSL Certificate Signing Request filename
+vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"     # OpenSSL Certificate filename
+vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"                     # HTTP/HTTPS connection to Vault service - default HTTPS
+vault_addr: "{{ ansible_fqdn }}"                                                                # Vault listener address
+vault_port: 8200									        # Vault listener port
+vault_cluster_port: 8201								        # Vault cluster port
+vault_user: vault									        # User to run the vault systemd service
+vault_uid: 8201 									        # UID of vault user
+vault_group: vault									        # Group for vault user
+vault_gid: 8201 									        # GID of vault group
+vault_service: vault									        # Name of the vault systemd service
+vault_profile: /etc/profile.d/vault.sh  						        # System-wide profile for setting Vault listening address
+vault_data_path: /data/vault                                                                    # Backend raft storage directory
+vault_ui: true                                                                                  # Enable Web UI
+vault_venv_path: /data/venv/vault                                                               # Python virtual env installation path
 ```
 
 ## Dependencies

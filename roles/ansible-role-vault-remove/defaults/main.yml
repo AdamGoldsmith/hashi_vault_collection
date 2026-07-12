@@ -2,7 +2,7 @@
 
 vault_bin_path: /usr/bin
 vault_conf: /etc/vault/config.hcl
-vault_certs: /etc/vault/certs
+vault_certs_dir: /etc/vault/certs
 vault_user: vault
 vault_group: vault
 vault_service: vault

@@ -24,7 +24,7 @@
     path: "{{ dir_item }}"
     state: absent
   loop:
-    - "{{ vault_certs }}"
+    - "{{ vault_certs_dir }}"
     - "{{ vault_conf | dirname }}"
     - "{{ audit_path }}"
     - "{{ venv_path }}"

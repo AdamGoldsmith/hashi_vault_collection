@@ -22,7 +22,7 @@ Currently tested on these Operating Systems
 ```yaml
 vault_bin_path: /usr/bin				# Path to install vault binary
 vault_conf: /etc/vault/config.hcl			# Vault configuration file
-vault_certs: /etc/vault/certs				# Vault certificates directory
+vault_certs_dir: /etc/vault/certs			# Vault certificates directory
 vault_user: vault					# User to run the vault systemd service
 vault_group: vault					# Group for vault user
 vault_service: vault					# Name of the vault systemd service
