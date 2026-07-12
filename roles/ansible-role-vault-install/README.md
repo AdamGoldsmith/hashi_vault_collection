@@ -33,14 +33,14 @@ vault_conf: /etc/vault/config.hcl							# Vault configuration file
 vault_tls_disable: false								# Choose whether to disable TLS for vault connections (not advised)
 vault_mlock_disable: false                                                              # Disbale mlock - sometimes required for the infrastructure (eg LXD)
 vault_certs: /etc/vault/certs								# Vault certificates directory
-vault_cn: "{{ ansible_fqdn }}"								# CSR Common Name
+vault_cn: "{{ vault_addr }}"								# CSR Common Name
 vault_cc: UK										# CSR Country Code
 vault_on: Vault	        								# CSR Organization Name
-vault_privkey: "{{ vault_certs }}/{{ vault_cn | regex_replace('^www\\.', '') }}.pem"	# OpenSSL Private Key filename
-vault_csr: "{{ vault_certs }}/{{ vault_cn }}.csr"					# OpenSSL Certificate Signing Request filename
-vault_certfile: "{{ vault_certs }}/{{ vault_cn | regex_replace('^www\\.', '') }}.crt"	# OpenSSL Certificate filename
+vault_privkey: "{{ vault_certs }}/{{ vault_addr | regex_replace('^www\\.', '') }}.pem"  # OpenSSL Private Key filename
+vault_csr: "{{ vault_certs }}/{{ vault_addr }}.csr"                                     # OpenSSL Certificate Signing Request filename
+vault_certfile: "{{ vault_certs }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt" # OpenSSL Certificate filename
 vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"             # HTTP/HTTPS connection to Vault service - default HTTPS
-vault_addr: "{{ ansible_fqdn }}"							# Vault listener address
+vault_addr: "{{ ansible_fqdn }}"                                                        # Vault listener address
 vault_port: 8200									# Vault listener port
 vault_cluster_port: 8201								# Vault cluster port
 vault_user: vault									# User to run the vault systemd service
