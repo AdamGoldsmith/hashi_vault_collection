@@ -39,7 +39,9 @@
     loop_var: key_item
   no_log: yes
   register: vault_unseal_result
-  when: vault_status['status'] == 503
+  when:
+    - vault_status['status'] is defined
+    - vault_status['status'] == 503
 
 # Set a localhost fact when one of the vaults was unsealed
 # In this case, when not all vaults were "skipped"
@@ -76,4 +78,6 @@
   loop_control:
     loop_var: key_item
   no_log: yes
-  when: vault_status['status'] == 501
+  when:
+    - vault_status['status'] is defined
+    - vault_status['status'] == 501
