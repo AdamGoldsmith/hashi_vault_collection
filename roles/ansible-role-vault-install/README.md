@@ -36,9 +36,9 @@ vault_certs_dir: /etc/vault/certs								# Vault certificates directory
 vault_cn: "{{ vault_addr }}"								        # CSR Common Name
 vault_cc: UK										        # CSR Country Code
 vault_on: Vault	        								        # CSR Organization Name
-vault_privkey: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.pem"      # OpenSSL Private Key filename
+vault_privkey: "{{ vault_certs_dir }}/{{ vault_addr }}.pem"                                     # OpenSSL Private Key filename
 vault_csr: "{{ vault_certs_dir }}/{{ vault_addr }}.csr"                                         # OpenSSL Certificate Signing Request filename
-vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"     # OpenSSL Certificate filename
+vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr }}.crt"                                    # OpenSSL Certificate filename
 vault_protocol: "{{ vault_tls_disable | bool | ternary('http', 'https') }}"                     # HTTP/HTTPS connection to Vault service - default HTTPS
 vault_addr: "{{ ansible_fqdn }}"                                                                # Vault listener address
 vault_port: 8200									        # Vault listener port

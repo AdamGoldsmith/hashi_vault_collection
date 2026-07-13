@@ -13,4 +13,4 @@ vault_tls_disable: no
 # TODO: Will remove the need for these once the certs have been signed by letsencrypt (probably use tls_mode: none, selfsign, signed)
 vault_addr: "{{ ansible_fqdn }}"
 vault_certs_dir: /etc/vault/certs
-vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"
+vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr }}.crt"
