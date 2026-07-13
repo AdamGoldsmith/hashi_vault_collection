@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+curl --silent --fail \
+{% if vault_tls_disable %}
+  --insecure \
+{% else %}
+  --cacert {{ vault_certfile }} \
+{% endif %}
+  "https://{{ vault_addr }}:8200/v1/sys/health?standbyok=false" > /dev/null

@@ -1,0 +1,50 @@
+global_defs {
+  router_id {{ inventory_hostname }}
+}
+
+vrrp_script chk_vault {
+  script "{{ vault_keepalived_script }}"
+  interval 2
+  timeout 3
+  weight -100
+  rise 2
+  fall 3
+}
+
+vrrp_instance VAULT {
+
+  state BACKUP
+
+  interface {{ vault_keepalived_interface }}
+
+  virtual_router_id {{ vault_keepalived_router_id }}
+
+  priority {{ vault_keepalived_priority }}
+
+  advert_int {{ vault_keepalived_advert_int }}
+
+  nopreempt
+
+  authentication {
+    auth_type PASS
+    auth_pass {{ vault_keepalived_auth_pass }}
+  }
+
+  unicast_src_ip {{ ansible_default_ipv4.address }}
+
+  unicast_peer {
+{% for host in vault_keepalived_nodes %}
+{% if host != inventory_hostname %}
+    {{ hostvars[host].ansible_default_ipv4.address }}
+{% endif %}
+{% endfor %}
+  }
+
+  virtual_ipaddress {
+    {{ vault_keepalived_vip }}/{{ vault_keepalived_prefix }}
+  }
+
+  track_script {
+    chk_vault
+  }
+}

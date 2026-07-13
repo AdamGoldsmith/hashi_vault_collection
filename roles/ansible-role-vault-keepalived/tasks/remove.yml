@@ -1,0 +1,26 @@
+---
+
+- name: Remove vault health script
+  ansible.builtin.file:
+    path: "{{ vault_keepalived_script }}"
+    state: absent
+
+- name: Remove keepalived.conf
+  ansible.builtin.file:
+    path: "{{ vault_keepalived_config }}"
+    state: absent
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Disable keepalived
+  ansible.builtin.systemd:
+    name: keepalived
+    enabled: false
+    state: stopped
+  when: "'keepalived.service' in ansible_facts.services"
+
+- name: Remove keepalived
+  ansible.builtin.package:
+    name: keepalived
+    state: absent

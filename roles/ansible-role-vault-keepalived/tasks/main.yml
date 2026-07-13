@@ -1,0 +1,20 @@
+---
+
+- name: Install keepalived
+  ansible.builtin.package:
+    name: keepalived
+    state: present
+
+- name: Install vault health script
+  ansible.builtin.template:
+    src: vault-health.sh.j2
+    dest: "{{ vault_keepalived_script }}"
+    mode: "0755"
+
+- name: Install keepalived.conf
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: "{{ vault_keepalived_config }}"
+    mode: "0644"
+  notify:
+    - Enable keepalived

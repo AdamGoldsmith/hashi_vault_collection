@@ -1,0 +1,16 @@
+---
+vault_keepalived_interface: "{{ ansible_default_ipv4.interface }}"
+vault_keepalived_vip: 192.168.10.50
+vault_keepalived_prefix: 24
+vault_keepalived_router_id: 51
+vault_keepalived_auth_pass: CHANGE_ME
+vault_keepalived_priority: 100
+vault_keepalived_advert_int: 1
+vault_keepalived_nodes: "{{ groups['vault'] }}"
+vault_keepalived_config: /etc/keepalived/keepalived.conf
+vault_keepalived_script: /usr/local/bin/vault-health.sh
+vault_tls_disable: no
+# TODO: Will remove the need for these once the certs have been signed by letsencrypt (probably use tls_mode: none, selfsign, signed)
+vault_addr: "{{ ansible_fqdn }}"
+vault_certs_dir: /etc/vault/certs
+vault_certfile: "{{ vault_certs_dir }}/{{ vault_addr | regex_replace('^www\\.', '') }}.crt"

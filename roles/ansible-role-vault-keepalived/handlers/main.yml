@@ -1,0 +1,6 @@
+---
+- name: Enable keepalived
+  ansible.builtin.systemd:
+    name: keepalived
+    enabled: true
+    state: started
