@@ -1,4 +1,4 @@
-# ansible-role-vault-install
+# ansible-role-vault-keepalived
 
 Installs & configure's keepalived for Hashicorp's Vault by
 * Installing keepalived package
