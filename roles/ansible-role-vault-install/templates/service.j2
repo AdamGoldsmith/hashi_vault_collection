@@ -20,7 +20,9 @@ KillSignal=SIGTERM
 Restart=on-failure
 RestartSec=42s
 
+{% if not vault_mlock_disable %}
 LimitMEMLOCK=infinity
+{% endif %}
 
 NoNewPrivileges=true
 PrivateTmp=true
